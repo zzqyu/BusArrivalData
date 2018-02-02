@@ -3,7 +3,7 @@
 class BusLocation:
 	##조회할 노선 아이디를 받는다.
 	def __init__(self, rootTag):
-		BusLocation.childTagName = ("routeId", "stationId", "endBus", "plateNo")
+		BusLocation.childTagName = ("routeId", "stationId", "endBus", "plateNo", "stationSeq")
 		self.root = rootTag
 		self.dataDict = {}
 		for t in BusLocation.childTagName:
@@ -19,6 +19,8 @@ class BusLocation:
 		return self.dataDict[BusLocation.childTagName[2]]
 	def getPlateNo(self):
 		return self.dataDict[BusLocation.childTagName[3]]
+	def getStationSeq(self):
+		return self.dataDict[BusLocation.childTagName[4]]
 	def getAll(self):
 		return self.dataDict
 		
