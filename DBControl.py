@@ -57,7 +57,7 @@ class DBControl:
 		self.cur.execute(sql)
 	
 	##데이터추가
-	def addDate(self, tableName, data):
+	def addData(self, tableName, data):
 		if len(self.tableTitle) != len(data):
 			return False
 			
@@ -79,19 +79,3 @@ class DBControl:
 	def dateToTableName(date):
 		return "data"+date.replace("-", "")
 		
-if __name__ == "__main__":
-	now = datetime.now()	
-	date = str(datetime.date(now))
-	localhost = "localhost"
-	server = "106.251.162.106"
-	serverPort = 11636
-	#dbc = DBControl(server, "root", "005410", "test", serverPort)
-	#print(dbc.getRowViaSql("date20180201"))
-	dbc = DBControl(server, "root", "005410", "busarrivaldb", serverPort)
-	#print(dbc.isThisTable(DBControl.dateToTableName(date)))
-	#dbc.createTable(DBControl.dateToTableName(date))
-	#print(dbc.isThisTable(DBControl.dateToTableName(date)+"count"))
-	#dbc.createCountTable(DBControl.dateToTableName(date))
-	#print(dbc.getRowViaSql(DBControl.dateToTableName(date)))
-	dbc.cur.execute("insert into data20180205 (id,stationName,stationID,arrTime,routeNo,routeID,endBus,weekday,holiday) values ('3','장안6리','233001419','18:14:08.423130','1','233000048','0','0','1') ;")
-	dbc.con.commit()

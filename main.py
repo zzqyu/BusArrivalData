@@ -6,6 +6,7 @@ from Holiday import Holiday
 import time
 from datetime import datetime
 from os import path
+import sys
 
 ## 노선번호:노선ID
 routeList = {
@@ -31,10 +32,10 @@ for no in routeList.keys():
 
 ##DB
 ##객체생성
-#dbc = DBControl(host="localhost", id="root", pw="005410", dbname="busarrivaldb")
-server = "106.251.162.106"
-serverPort = 11636
-dbc = DBControl(server, "root", "005410", "busarrivaldb", serverPort)
+server = "서버IP"
+serverPort = "int 포트번호"
+dbc = DBControl(server, "root", "비번", "busarrivaldb", serverPort)
+#dbc = DBControl("localhost", "root", "005410", "busarrivaldb")
 while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 	try:
 		now = datetime.now()	
@@ -66,17 +67,18 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 			now = datetime.now()
 			print(now)
 			curTime = str(datetime.time(now))
-			if curTime.split('.')[0] == "00:00:00":
+			if  "00:00" in curTime.split('.')[0] :
+				time.sleep(60)
 				break
-			
-			
+			elif  datetime(now.year, now.month, now.day, 1, 0, 0, 0)< now <datetime(now.year, now.month, now.day, 5, 0, 0, 0):
+				time.sleep((5-now.hour)*3600 + (60-now.minute)*60) ## 01시부터 05시까지 슬립
 			##모든 노선을 조회하는 루프
 			for no in routeList.keys():
 				##조회할 노선의 버스위치 목록
 				dd = DriveData(routeList[no])
 				if not dd.isConnectInternet():
 					print("인터넷 확인하세요!")
-					break
+					sys.exit()
 				locaList = dd.getBusLocations()
 				
 				if len(locaList)>0:
@@ -85,12 +87,12 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 					for bl in locaList:
 						cbl = BusLocation(bl)
 						##정류장순서
-						seq = int(cbl.getStationSeq())
+						seq = int(cbl.getStationSeq())-1##xml에서 1부터 시작해서 
 						##버스 및 현재 정류장정보 출력
 						locaInfo =  cbl.getAll()
 						nowLocaList.append(locaInfo)
 						if not locaInfo in preLocaList:
-							dbc.addDate(DBControl.dateToTableName(date), ( str(curCount),   routeStationList[no][seq], cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
+							dbc.addData(DBControl.dateToTableName(date), ( str(curCount),   routeStationList[no][seq], cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
 							dbc.incRowViaTable(DBControl.dateToTableName(date))
 							curCount+=1	
 			preLocaList = nowLocaList[:]
@@ -101,7 +103,7 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 				time.sleep(1)
 	except Exception as e :
 		ferr = open("error-"+str(now).replace(".", "_")[1]+".txt", 'w')
-		ferr.write(e+"\n")
+		ferr.write(str(e)+"\n")
 		print(e)
 		ferr.close()
 
