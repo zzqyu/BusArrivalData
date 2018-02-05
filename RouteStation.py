@@ -23,7 +23,7 @@ class RouteStation:
 		request = Request(self.url + queryParams)
 		request.get_method = lambda: 'GET'
 		try:
-			self.xmlStr = RouteStation.binToUtf8(urlopen(request).read())
+			self.xmlStr = binToUtf8(urlopen(request).read())
 			self.root = fromstring(self.xmlStr)
 		except:
 			self.isOnInternet = False
@@ -56,13 +56,6 @@ class RouteStation:
 		for i in aList:
 			names.append(i.findtext("stationName"))
 		return names
-		
-	## binary data to utf-8
-	def binToUtf8(data):
-		# 바이너리 데이터를 utf-16으로 디코딩한다
-		# 수직 탭을 삭제한다
-		return data.decode("utf-8").replace(u"\u000B", u"")
-		
 		
 ##테스트코드
 if __name__ == "__main__" :
