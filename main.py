@@ -32,8 +32,8 @@ for no in routeList.keys():
 
 ##DB
 ##객체생성
-server = "서버IP"
-serverPort = "int 포트번호"
+server = "서버주소"
+serverPort = "int 포트번호" 
 dbc = DBControl(server, "root", "비번", "busarrivaldb", serverPort)
 #dbc = DBControl("localhost", "root", "005410", "busarrivaldb")
 while True:##하루에 1번 작동하는 루프(날짜바뀔때)
@@ -87,11 +87,13 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 					for bl in locaList:
 						cbl = BusLocation(bl)
 						##정류장순서
-						seq = int(cbl.getStationSeq())-1##xml에서 1부터 시작해서 
+						seq = int (cbl.getStationSeq() )
 						##버스 및 현재 정류장정보 출력
 						locaInfo =  cbl.getAll()
 						nowLocaList.append(locaInfo)
 						if not locaInfo in preLocaList:
+							print("[seq]", seq, "[id]", cbl.getStationId(), end = "" )
+							print("[name]", routeStationList[no][seq])
 							dbc.addData(DBControl.dateToTableName(date), ( str(curCount),   routeStationList[no][seq], cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
 							dbc.incRowViaTable(DBControl.dateToTableName(date))
 							curCount+=1	

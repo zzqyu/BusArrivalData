@@ -17,7 +17,6 @@ class DBControl:
 		for i in range(len(self.tableTitle)):
 			sql+=(self.tableTitle[i] + " varchar(" + str(self.tableItemLen[i]) + ") not null,")
 		sql+="primary key(id) );"
-		print("[테이블생성 sql]", sql)
 		self.cur.execute(sql)
 		self.con.commit()
 		
@@ -25,7 +24,6 @@ class DBControl:
 	def isThisTable(self, tableName):
 		self.cur.execute("show tables like '%s'" % tableName)
 		printstr =str(self.cur.fetchall())
-		print("[]", printstr)
 		return tableName in printstr
 		
 	##count테이블생성
@@ -38,12 +36,10 @@ class DBControl:
 	def getRowViaSql(self, tableName):
 		self.cur.execute( "select count(*) from %s;" % tableName)
 		answer = self.cur.fetchall()
-		print("[getRowViaSql]", answer)
 		return list(answer[0].values())[0]
 	def getRowViaTable(self, tableName):
 		self.cur.execute("select * from " + tableName + "count")
 		answer = self.cur.fetchall()
-		print("[getRowViaTable]", answer)
 		return list(answer[0].values())[0]
 	def updateRowViaTable(self, tableName):
 		curRow = self.getRowViaTable(tableName)
@@ -53,7 +49,6 @@ class DBControl:
 	def incRowViaTable(self, tableName):
 		curRow = int(self.getRowViaTable(tableName))
 		sql = "update " + tableName + "count set count='%d' where count='%d';" % (curRow+1, curRow)
-		print("[incRowViaTable]", sql)
 		self.cur.execute(sql)
 	
 	##데이터추가
@@ -71,7 +66,6 @@ class DBControl:
 			sql+=("'%s'," % i)
 		#sql+="\b) ;"
 		sql=sql[:-1] + ") ;"
-		print("[데이터추가 sql]", sql)
 		self.cur.execute(sql)
 		self.con.commit()
 		return True

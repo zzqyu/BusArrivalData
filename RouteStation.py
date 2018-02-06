@@ -52,7 +52,7 @@ class RouteStation:
 		##정류장 순서 기준을 정렬
 		sorted(aList, key = lambda x: int(x.findtext("stationSeq")))
 		names = []
-		names.append(None)
+		names.append("")
 		for i in aList:
 			names.append(i.findtext("stationName"))
 		return names
