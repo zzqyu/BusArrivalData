@@ -5,8 +5,8 @@ class DBControl:
 		#self.con = pymysql.connect(host, port, id, pw, dbname, charset='utf8')
 		self.con = pymysql.connect(host=_host, port=_port, user=_id, password=_pw, database=_dbname, charset='utf8')
 		self.cur = self.con.cursor(pymysql.cursors.DictCursor)
-		self.tableTitle=("id", "stationName","stationID","arrTime","routeNo","routeID","endBus","weekday","holiday")
-		self.tableItemLen = (7, 40, 10, 16, 20, 10, 2,2,2)
+		self.tableTitle=("id", "stationName","stationID","arrTime","routeNo","routeID", "plateNo" ,  "endBus","weekday","holiday")
+		self.tableItemLen = (7, 40, 10, 16, 20, 10, 13, 2,2,2)
 		self.cur.execute("set names utf8")
 	def __del__(self):
 		self.con.close()

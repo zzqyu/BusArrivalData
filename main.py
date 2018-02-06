@@ -95,7 +95,7 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 						if (not locaInfo in preLocaList) and (not "(경유)" in stationName) :
 							print("[seq]", seq, "[id]", cbl.getStationId(), end = "" )
 							print("[name]", stationName)
-							dbc.addData(DBControl.dateToTableName(date), ( str(curCount),  stationName,  cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
+							dbc.addData(DBControl.dateToTableName(date), ( str(curCount),  stationName,  cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getPlateNo(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
 							dbc.incRowViaTable(DBControl.dateToTableName(date))
 							curCount+=1	
 			preLocaList = nowLocaList[:]
