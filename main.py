@@ -71,7 +71,7 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 				time.sleep(60)
 				break
 			elif  datetime(now.year, now.month, now.day, 1, 0, 0, 0)< now <datetime(now.year, now.month, now.day, 5, 0, 0, 0):
-				time.sleep((5-now.hour)*3600 + (60-now.minute)*60) ## 01시부터 05시까지 슬립
+				time.sleep((4-now.hour)*3600 + (60-now.minute)*60) ## 01시부터 05시까지 슬립
 			##모든 노선을 조회하는 루프
 			for no in routeList.keys():
 				##조회할 노선의 버스위치 목록
