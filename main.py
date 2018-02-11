@@ -7,6 +7,9 @@ import time
 from datetime import datetime
 from os import path
 import sys
+import traceback
+
+errorCount = 0
 
 ## 노선번호:노선ID
 routeList = {
@@ -35,45 +38,56 @@ for no in routeList.keys():
 server = "서버주소"
 serverPort = "int 포트번호" 
 dbc = DBControl(server, "root", "비번", "busarrivaldb", serverPort)
-#dbc = DBControl("localhost", "root", "005410", "busarrivaldb")
+#dbc = DBControl("localhost", "root", "비번", "busarrivaldb")
 while True:##하루에 1번 작동하는 루프(날짜바뀔때)
-	try:
-		now = datetime.now()	
-		date = str(datetime.date(now))
-		weekday = str(datetime.weekday(now))
-		isHoliday = Holiday().isHoliday(date.replace("-", ""))
-		
-		##오늘날짜 테이블있는지 확인
-		if not dbc.isThisTable(DBControl.dateToTableName(date)):
-			##없으면 만든다
-			dbc.createTable(DBControl.dateToTableName(date))
-		##오늘날짜 카운트 있는지 확인	
-		if not dbc.isThisTable(DBControl.dateToTableName(date)+"count"):
-			##없으면 만든다
-			dbc.createCountTable(DBControl.dateToTableName(date))
-		else:##있으면 실제 row수와 기록을 맞춘다
-			dbc.updateRowViaTable(DBControl.dateToTableName(date))
-		##row가져오기
-		curCount = int(dbc.getRowViaTable(DBControl.dateToTableName(date)))
-
+	print("loop1")
+	now = datetime.now()	
+	date = str(datetime.date(now))
+	weekday = str(datetime.weekday(now))
+	isHoliday = Holiday().isHoliday(date.replace("-", ""))
+	
+	##오늘날짜 테이블있는지 확인
+	if not dbc.isThisTable(DBControl.dateToTableName(date)):
+		##없으면 만든다
+		dbc.createTable(DBControl.dateToTableName(date))
+	##오늘날짜 로그테이블있는지 확인
+	if not dbc.isThisTable(DBControl.dateToTableName(date)+"log"):
+		##없으면 만든다
+		dbc.createLogTable(DBControl.dateToTableName(date))
+	##오늘날짜 카운트 있는지 확인	
+	if not dbc.isThisTable(DBControl.dateToTableName(date)+"count"):
+		##없으면 만든다
+		dbc.createCountTable(DBControl.dateToTableName(date))
+	else:##있으면 실제 row수와 기록을 맞춘다
+		dbc.updateRowViaTable(DBControl.dateToTableName(date))
+	##row가져오기
+	curCount = int(dbc.getRowViaTable(DBControl.dateToTableName(date)))
 			
-		preLocaList=[]
-		nowLocaList=[]
+	preLocaList=[]
+	nowLocaList=[]
 
 	
-		##하루종일 도는 루프 (날짜 바뀌면 빠짐)
-		while True:
-			##현재시간 프린트
-			now = datetime.now()
-			print(now)
-			curTime = str(datetime.time(now))
-			if  "00:00" in curTime.split('.')[0] :
-				time.sleep(60)
-				break
-			elif  datetime(now.year, now.month, now.day, 1, 0, 0, 0)< now <datetime(now.year, now.month, now.day, 5, 0, 0, 0):
-				time.sleep((4-now.hour)*3600 + (60-now.minute)*60) ## 01시부터 05시까지 슬립
+	##하루종일 도는 루프 (날짜 바뀌면 빠짐)
+	while True:
+		print("loop2")
+		##현재시간 프린트
+		now = datetime.now()
+		print(now)
+		curTime = str(datetime.time(now))
+		if  "00:00" in curTime.split('.')[0] :
+			time.sleep(60-now.second)
+			break
+		elif  datetime(now.year, now.month, now.day, 1, 0, 0, 0)< now <datetime(now.year, now.month, now.day, 5, 0, 0, 0):
+			time.sleep((4-now.hour)*3600 + (60-now.minute)*60) ## 01시부터 05시까지 슬립
+			break
+		lognum=0
+		for pll in preLocaList:
+			dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum,str(pll).replace("'", "").replace(":", "-").replace(",", ""))) ; lognum+=1
+
+		try:
 			##모든 노선을 조회하는 루프
 			for no in routeList.keys():
+				print("loop3")
 				##조회할 노선의 버스위치 목록
 				dd = DriveData(routeList[no])
 				if not dd.isConnectInternet():
@@ -85,29 +99,54 @@ while True:##하루에 1번 작동하는 루프(날짜바뀔때)
 					print(no, "번")
 					##조회한 노선의 모든 버스위치를 출력하는 루프 
 					for bl in locaList:
+						print("loop4")
 						cbl = BusLocation(bl)
 						##정류장순서
 						seq = int (cbl.getStationSeq() )
 						##버스 및 현재 정류장정보 출력
 						locaInfo =  cbl.getAll()
 						nowLocaList.append(locaInfo)
-						stationName = routeStationList[no][seq]
-						if (not locaInfo in preLocaList) and (not "(경유)" in stationName) :
-							print("[seq]", seq, "[id]", cbl.getStationId(), end = "" )
-							print("[name]", stationName)
-							dbc.addData(DBControl.dateToTableName(date), ( str(curCount),  stationName,  cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getPlateNo(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
-							dbc.incRowViaTable(DBControl.dateToTableName(date))
-							curCount+=1	
+						dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum, no+"번 seq "+str(seq))) ; lognum+=1
+						if len(routeStationList[no]) > seq:
+							stationName = routeStationList[no][seq]
+							if (not locaInfo in preLocaList) and (not "(경유)" in stationName) :
+								print("[seq]", seq, "[id]", cbl.getStationId(), end = "" )
+								print("[name]", stationName)
+								print("add log")
+								dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum,str(locaInfo).replace("'", "").replace(":", "-").replace(",", "")+"[station]: "+ stationName)) ; lognum+=1
+								print("add data")
+								dbc.addData(DBControl.dateToTableName(date), ( str(curCount),  stationName,  cbl.getStationId(), curTime, no, cbl.getRouteId(), cbl.getPlateNo(), cbl.getEndBus(), weekday, str(int(isHoliday))  ) )
+								print("update count")
+								dbc.incRowViaTable(DBControl.dateToTableName(date))
+								curCount+=1
+						else :
+							dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum, "순서 튐")) ; lognum+=1
+					print("loop4 end")
+			print("loop3 end")	
 			preLocaList = nowLocaList[:]
+			dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum,str(len(preLocaList))+"")) ; lognum+=1
 			nowLocaList = []
-			print("\n25초 대기....")
-			for i in range(25):
+		except Exception as e :
+			ferr = open("error.txt", 'a')
+			print(traceback.format_exc())
+			ferr.write(str(datetime.now())+"\n"+str(traceback.format_exc()+"\n"))
+			ferr.close()
+			errorCount+=1
+			if errorCount > 10:
+				sys.exit()
+		finally:
+			print("\n20초 대기....")
+			i=0
+			for i in range(20):
 				print (i+1)
 				time.sleep(1)
-	except Exception as e :
-		ferr = open("error-"+str(now).replace(".", "_")[1]+".txt", 'w')
-		ferr.write(str(e)+"\n")
-		print(e)
-		ferr.close()
+			dbc.addDataLogTable(DBControl.dateToTableName(date), (curTime,lognum,"sleep "+str(i)))
+
+	print("loop2 end")
 
 
+
+	
+	
+
+	
