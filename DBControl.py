@@ -19,6 +19,10 @@ class DBControl:
 		sql+="primary key(id) );"
 		self.cur.execute(sql)
 		self.con.commit()
+
+	def resultSql(self, sql):
+		self.cur.execute(sql)
+		return list(self.cur.fetchall())
 		
 	##테이블확인
 	def isThisTable(self, tableName):
@@ -50,7 +54,7 @@ class DBControl:
 		curRow = int(self.getRowViaTable(tableName))
 		sql = "update " + tableName + "count set count='%d' where count='%d';" % (curRow+1, curRow)
 		self.cur.execute(sql)
-
+	'''
 	##로그 테이블 생성
 	def createLogTable(self, tableName):
 		self.cur.execute( "create table "+tableName+ "log (time varchar(16) not null, seq varchar(3) not null, log varchar(128) not null);")
@@ -60,7 +64,7 @@ class DBControl:
 	def addDataLogTable(self, tableName, data):
 		self.cur.execute( "insert into " + tableName + "log (time, seq, log) values ('%s', '%s', '%s');" % data )
 		self.con.commit()
-	
+	'''	
 	##데이터추가
 	def addData(self, tableName, data):
 		if len(self.tableTitle) != len(data):
