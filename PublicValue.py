@@ -14,7 +14,8 @@ def binToUtf8(data):
 	return data.decode("utf-8").replace(u"\u000B", u"")
 
 def getRouteList():
-	dbc = DBControl("localhost", "root", "비번", "busarrivaldb")
+	dbc = DBControl(localhost, "root", "비번", "joambusdb")
+	#dbc = DBControl("localhost", "root", "비번", "busarrivaldb")
 	result=dbc.resultSql("select routeName, routeId From routeInfo;")
 	routeList={}
 	for row in result:

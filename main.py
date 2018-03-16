@@ -29,7 +29,7 @@ routeList = {
 	"8155": "233000139", "9801": "241005320", "9802": "241005300"
 	}	
 	'''
-routeList = getRouteList()
+routeList = {}
 ##노선번호:정류장목록
 routeStationList = {}
 for no in routeList.keys():
@@ -40,10 +40,12 @@ for no in routeList.keys():
 ##DB
 ##객체생성
 server = "서버주소"
-serverPort = "int 포트번호" 
+serverPort = "포트번호 int"
 dbc = DBControl(server, "root", "비번", "busarrivaldb", serverPort)
 #dbc = DBControl("localhost", "root", "비번", "busarrivaldb")
 while True:##하루에 1번 작동하는 루프(날짜바뀔때)
+	routeList=getRouteList()
+	print(routeList)
 	now = datetime.now()	
 	date = str(datetime.date(now))
 	weekday = str(datetime.weekday(now))
